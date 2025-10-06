@@ -2,6 +2,9 @@ import Navbar from "~/components/Navbar";
 import type { Route } from "./+types/home";
 import { resumes } from "~/constants";
 import ResumeCard from "~/components/ResumeCard";
+import { usePuterStore } from "~/puter/puter";
+import { useLocation, useNavigate } from "react-router";
+import { useEffect } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -11,6 +14,16 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const { isLoading, auth, init } = usePuterStore();
+  const location = useLocation();
+  const next: string = location.search.split('next=')[1];
+  const navigate = useNavigate();
+  useEffect(() => {
+    if(!auth.isAuthenticated) {
+      navigate('/auth?next=/');
+    } 
+    init();
+  }, [auth.isAuthenticated]);
   return <main className="bg-[url('/images/bg-main.svg')] bg-cover">
     <Navbar />
     <section className="main-section py-16">
