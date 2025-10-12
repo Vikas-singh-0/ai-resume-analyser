@@ -72,9 +72,12 @@ function upload() {
       await kv.set(`resume:${uuid}`, JSON.stringify(data));
       setStatusText("Analysis complete");
       console.log(data);
+      navigate(`/resume/${uuid}`);
+      setIsProcesssing(false);
+      
     } catch (err) {
       console.log(err);
-      // setIsProcesssing(false);
+      setIsProcesssing(false);
       return;
     }
   };
