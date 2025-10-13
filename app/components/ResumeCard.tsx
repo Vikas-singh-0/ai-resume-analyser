@@ -4,7 +4,7 @@ import ScoreCircle from "./ScoreCircle";
 import { usePuterStore } from "~/puter/puter";
 import type { Resume } from "~/types";
 
-function ResumeCard({ resume }: { resume: Resume }) {
+function ResumeCard({ resume, onDelete }: { resume: Resume; onDelete: (id: string) => void }) {
   const { fs } = usePuterStore();
   const [resumeUrl, setResumeUrl] = useState("");
 
@@ -31,8 +31,18 @@ function ResumeCard({ resume }: { resume: Resume }) {
             {resume.jobTitle}
           </h3>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center gap-2">
           <ScoreCircle score={resume.feedback.overallScore} />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onDelete(resume.id);
+            }}
+            className="p-1 hover:bg-red-100 rounded"
+          >
+            <img src="/icons/cross.svg" alt="Delete" className="w-5 h-5" />
+          </button>
         </div>
       </div>
       {resumeUrl && (<div className="gradiant-border animate-in fade-in duration-1000">

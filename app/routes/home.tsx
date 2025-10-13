@@ -1,6 +1,6 @@
 import Navbar from "~/components/Navbar";
 import type { Route } from "./+types/home";
-import { resumes } from "~/constants";
+// import { resumes } from "~/constants";
 import ResumeCard from "~/components/ResumeCard";
 import { usePuterStore } from "~/puter/puter";
 import { useLocation, useNavigate } from "react-router";
@@ -15,12 +15,32 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { isLoading, auth, init, kv } = usePuterStore();
+  const { isLoading, auth, init, kv, fs } = usePuterStore();
   const location = useLocation();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setResumesLoading] = useState(false);
   const next: string = location.search.split("next=")[1];
   const navigate = useNavigate();
+
+  const deleteResume = async (resumeId: string) => {
+    const resume = resumes.find(r => r.id === resumeId);
+    if (!resume) return;
+
+    try {
+      // Delete from KV
+      // kv.del
+      await kv.del(`resume:${resumeId}`);
+      // Delete image file
+      await fs.delete(resume.imagePath);
+      // Delete resume file
+      await fs.delete(resume.resumePath);
+      // Update local state
+      setResumes(resumes.filter(r => r.id !== resumeId));
+    } catch (error) {
+      console.error("Failed to delete resume:", error);
+      // Optionally show error to user
+    }
+  };
 
   useEffect(() => {
     const loadResumes = async () => {
@@ -51,9 +71,7 @@ export default function Home() {
       {!loadingResumes && resumes.length > 0 && (
         <div className="resumes-section">
           {resumes.map((resume) => (
-            <>
-              <ResumeCard key={resume.id} resume={resume} />
-            </>
+              <ResumeCard key={resume.id} resume={resume} onDelete={deleteResume} />
           ))}
         </div>
         // <div key={resume.id} className="resume-card">
